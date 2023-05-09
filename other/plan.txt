@@ -1,0 +1,8 @@
+Setup p5 and sever
+- see bounce happen when the ball bounces
+install CNMAT externals in Max
+setup max patch
+- play sound when ball bounces
+add metro to max patch
+send pulse on metro, change visuals
+add mouse control
