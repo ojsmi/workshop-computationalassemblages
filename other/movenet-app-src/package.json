@@ -1,7 +1,7 @@
 {
   "name": "movenet-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "posenet 2 websockets",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "author": "",
+  "author": "oliver smith",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.1.1",
