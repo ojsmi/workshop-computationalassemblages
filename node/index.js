@@ -13,8 +13,8 @@ const fromMaxPort = 8003;
 const app = express();
 const server = http.createServer( app );
 const io = new socketio.Server(server);
-const oscClient = new osc.Client('127.0.0.1', toMaxPort );
-const oscServer = new osc.Server( fromMaxPort, '127.0.0.1' );
+const toMax = new osc.Client('127.0.0.1', toMaxPort );
+const fromMax = new osc.Server( fromMaxPort, '127.0.0.1' );
 
 app.use( express.static('public') );
 
@@ -22,32 +22,32 @@ server.listen( webPort, () => {
     console.log(`Server running at http://localhost:${webPort}`);
 });
 
-const p5 = new Set();
+const p5connections = new Set();
 
-io.on('connection', (socket) => {
+io.on('connection', (p5) => {
     console.log('p5 connected');  
     
-    p5.add( socket );
+    p5connections.add( p5 );
     
-    socket.on('disconnect', () => {
-        p5.delete( socket );
+    p5.on('disconnect', () => {
+        p5connections.delete( p5 );
         console.log('p5 disconnected');
     });
 
-    socket.on('bounce', () => {
+    p5.on('bounce', () => {
         console.log('bounce');
-        oscClient.send( '/p5/bounce', 1 );
+        toMax.send( '/bounce', 1 );
     });
 
-    socket.on('mouse', ( mouse ) => {
+    p5.on('mouse', ( mouse ) => {
         console.log( 'mouse', mouse );
-        oscClient.send( '/p5/mouse/x', mouse.x );
-        oscClient.send( '/p5/mouse/y', mouse.y );
+        toMax.send( '/mouse/x', mouse.x );
+        toMax.send( '/mouse/y', mouse.y );
     });
     
-    oscServer.on( 'pulse', ( message ) => {
+    fromMax.on( 'pulse', ( message ) => {
         console.log( 'pulse' );
-        socket.emit( 'pulse' );
+        p5.emit( 'pulse' );
     });
 });
 
@@ -60,13 +60,13 @@ io.of('/posenet').on('connection', (socket) => {
 
     socket.on('pose', ( pose ) => {
         console.log( 'pose' );
-        oscClient.send( '/pose/left_wrist/x', pose.left_wrist.x );
-        oscClient.send( '/pose/left_wrist/y', pose.left_wrist.y );
-        oscClient.send( '/pose/right_wrist/x', pose.right_wrist.x );
-        oscClient.send( '/pose/right_wrist/y', pose.right_wrist.y );
+        toMax.send( '/pose/left_wrist/x', pose.left_wrist.x );
+        toMax.send( '/pose/left_wrist/y', pose.left_wrist.y );
+        toMax.send( '/pose/right_wrist/x', pose.right_wrist.x );
+        toMax.send( '/pose/right_wrist/y', pose.right_wrist.y );
 
-        p5.forEach( ( p5Socket ) => {
-            p5Socket.emit( 'pose', pose );
+        p5connections.forEach( ( p5 ) => {
+            p5.emit( 'pose', pose );
         } )
     });
 })
